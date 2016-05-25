@@ -37,10 +37,6 @@ abstract class ModelAbstract implements ModelInterface, SavableModelInterface
 	 */
 	public function __get($name)
 	{
-		if (property_exists($this, $name)) {
-			return $this->$name;
-		}
-
 		if (array_key_exists($name, $this->data)) {
 			return $this->data[$name];
 		}
@@ -54,11 +50,6 @@ abstract class ModelAbstract implements ModelInterface, SavableModelInterface
 	 */
 	function __set($name, $value)
 	{
-		if (property_exists($this, $name)) {
-			$this->$name = $value;
-			return;
-		}
-
 		if (!isset($this->data[$name]) || $this->data[$name] != $value) {
 			$this->isDirty = true;
 		}
