@@ -15,11 +15,9 @@ class NullStorage implements StorageInterface
 	 */
 	public function persist(SavableModelInterface $model)
 	{
-		if (!$model->isDirty()) {
-			return;
+		if ($model->isDirty()) {
+			$model->markAsStored();
 		}
-
-		$model->markAsStored();
 	}
 
 

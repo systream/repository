@@ -1,15 +1,12 @@
 <?php
 
-
 namespace Systream\Repository\Model;
-
 
 /**
  * @property string $id
  */
 abstract class ModelAbstract implements ModelInterface, SavableModelInterface
 {
-
 	/**
 	 * @var bool
 	 */
