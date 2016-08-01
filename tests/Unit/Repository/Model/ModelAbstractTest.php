@@ -11,7 +11,7 @@ class ModelAbstractTest extends \PHPUnit_Framework_TestCase
 	 */
 	public function instance()
 	{
-		$model = new ModelFixture();
+		$model = $this->getModel();
 		$this->assertInstanceOf('\Systream\Repository\Model\ModelAbstract', $model);
 		$this->assertInstanceOf('\Systream\Repository\Model\ModelInterface', $model);
 		$this->assertInstanceOf('\Systream\Repository\Model\SavableModelInterface', $model);
@@ -24,7 +24,7 @@ class ModelAbstractTest extends \PHPUnit_Framework_TestCase
 	 */
 	public function loadData_getData($data)
 	{
-		$model = new ModelFixture();
+		$model = $this->getModel();
 		$model->loadData($data);
 		$this->assertEquals($data, $model->getData());
 		$this->assertEquals($data, $model->toArray());
@@ -37,7 +37,7 @@ class ModelAbstractTest extends \PHPUnit_Framework_TestCase
 	 */
 	public function getViaMagic($data)
 	{
-		$model = new ModelFixture();
+		$model = $this->getModel();
 		$model->loadData($data);
 		foreach ($data as $property => $value) {
 			$this->assertEquals($value, $model->$property);
@@ -51,7 +51,7 @@ class ModelAbstractTest extends \PHPUnit_Framework_TestCase
 	 */
 	public function setViaMagic($data)
 	{
-		$model = new ModelFixture();
+		$model = $this->getModel();
 		foreach ($data as $property => $value) {
 			$model->$property = $value;
 		}
@@ -64,7 +64,7 @@ class ModelAbstractTest extends \PHPUnit_Framework_TestCase
 	 */
 	public function setExistsProperty()
 	{
-		$model = new ModelFixture();
+		$model = $this->getModel();
 		$model->propertyNotSet = 'foo';
 
 		$this->assertEquals('foo', $model->propertyNotSet);
@@ -78,7 +78,7 @@ class ModelAbstractTest extends \PHPUnit_Framework_TestCase
 	 */
 	public function getPropertyNotSetNotExists_viaMagic()
 	{
-		$model = new ModelFixture();
+		$model = $this->getModel();
 		$this->assertNull($model->anonexitsproperty);
 	}
 
@@ -87,7 +87,7 @@ class ModelAbstractTest extends \PHPUnit_Framework_TestCase
 	 */
 	public function defaultIsDirty()
 	{
-		$model = new ModelFixture();
+		$model = $this->getModel();
 		$this->assertTrue($model->isDirty());
 	}
 
@@ -96,7 +96,7 @@ class ModelAbstractTest extends \PHPUnit_Framework_TestCase
 	 */
 	public function removeDirtyFlagByMarkAsStored()
 	{
-		$model = new ModelFixture();
+		$model = $this->getModel();
 		$this->assertTrue($model->isDirty());
 		$model->markAsStored();
 		$this->assertFalse($model->isDirty());
@@ -107,7 +107,7 @@ class ModelAbstractTest extends \PHPUnit_Framework_TestCase
 	 */
 	public function setDirtyByModifyProperty()
 	{
-		$model = new ModelFixture();;
+		$model = $this->getModel();;
 		$model->markAsStored();
 		$this->assertFalse($model->isDirty());
 		$model->foo = 'bar';
@@ -119,7 +119,7 @@ class ModelAbstractTest extends \PHPUnit_Framework_TestCase
 	 */
 	public function dirtyFlagRemainsTheSameWhenTheSameValueSetted()
 	{
-		$model = new ModelFixture();
+		$model = $this->getModel();
 		$model->foo = 'bar';
 		$model->markAsStored();
 		$this->assertFalse($model->isDirty());
@@ -134,7 +134,7 @@ class ModelAbstractTest extends \PHPUnit_Framework_TestCase
 	 */
 	public function getOriginalValue($data)
 	{
-		$model = new ModelFixture();
+		$model = $this->getModel();
 		$model->loadData($data);
 		$this->assertEquals(array_keys($data), $model->getFields());
 	}
@@ -144,7 +144,7 @@ class ModelAbstractTest extends \PHPUnit_Framework_TestCase
 	 */
 	public function originalValue_nothing()
 	{
-		$model = new ModelFixture();
+		$model = $this->getModel();
 		$model->foo = 'bar';
 		$this->assertNull($model->getOriginalValue('foo'));
 	}
@@ -154,7 +154,7 @@ class ModelAbstractTest extends \PHPUnit_Framework_TestCase
 	 */
 	public function originalValue_something()
 	{
-		$model = new ModelFixture();
+		$model = $this->getModel();
 		$model->foo = 'bar';
 		$model->markAsStored();
 		$model->foo = 'bar2';
@@ -166,7 +166,7 @@ class ModelAbstractTest extends \PHPUnit_Framework_TestCase
 	 */
 	public function originalValue_doubleSet()
 	{
-		$model = new ModelFixture();
+		$model = $this->getModel();
 		$model->foo = 'bar';
 		$model->markAsStored();
 		$model->foo = 'bar2';
@@ -179,7 +179,7 @@ class ModelAbstractTest extends \PHPUnit_Framework_TestCase
 	 */
 	public function originalValue_sameWhenNotModified()
 	{
-		$model = new ModelFixture();
+		$model = $this->getModel();
 		$model->foo = 'bar';
 		$model->markAsStored();
 		$this->assertEquals(
@@ -235,6 +235,14 @@ class ModelAbstractTest extends \PHPUnit_Framework_TestCase
 				)
 			),
 		);
+	}
+
+	/**
+	 * @return ModelFixture
+	 */
+	protected function getModel()
+	{
+		return new ModelFixture();
 	}
 
 }

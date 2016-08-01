@@ -25,4 +25,14 @@ interface SavableModelInterface
 	 * @return mixed
 	 */
 	public function getOriginalValue($propertyName);
+
+	/**
+	 * @return string|null
+	 */
+	public function getId();
+
+	/**
+	 * @return array
+	 */
+	public function getFields();
 }

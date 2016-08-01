@@ -5,7 +5,7 @@ For saving models with repository pattern.
 
 You can install this package via [packagist.org](https://packagist.org/packages/systream/repository) with [composer](https://getcomposer.org/).
 
-`composer require systream/feature-switch`
+`composer require systream/repository`
 
 composer.json:
 

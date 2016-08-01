@@ -4,6 +4,9 @@
 namespace Systream\Repository\Model;
 
 
+/**
+ * @property string $id
+ */
 abstract class ModelAbstract implements ModelInterface, SavableModelInterface
 {
 
@@ -108,5 +111,13 @@ abstract class ModelAbstract implements ModelInterface, SavableModelInterface
 	public function toArray()
 	{
 		return (array)$this->getData();
+	}
+
+	/**
+	 * @return string|null
+	 */
+	public function getId()
+	{
+		return $this->id;
 	}
 }
