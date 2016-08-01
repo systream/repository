@@ -7,7 +7,7 @@ use Systream\Repository\Model\SavableModelInterface;
 use Systream\Repository\Storage\Exception\DirtyModelException;
 use Systream\Repository\Storage\Exception\NothingDeletedException;
 
-class SqlStorage implements StorageInterface
+class SqlStorage implements StorageInterface, TransactionAbleStorageInterface
 {
 	/**
 	 * @var \PDO
@@ -128,5 +128,29 @@ class SqlStorage implements StorageInterface
 		if (!$affectedRowCount) {
 			throw new NothingDeletedException(sprintf('Noting deleted from %s with %s id', $this->table, $model->getId()));
 		}
+	}
+
+	/**
+	 * @return void
+	 */
+	public function beginTransaction()
+	{
+		$this->pdo->beginTransaction();
+	}
+
+	/**
+	 * @return void
+	 */
+	public function rollBack()
+	{
+		$this->pdo->rollBack();
+	}
+
+	/**
+	 * @return void
+	 */
+	public function commit()
+	{
+		$this->pdo->commit();
 	}
 }

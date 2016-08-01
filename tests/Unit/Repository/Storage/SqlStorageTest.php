@@ -187,6 +187,46 @@ class SqlStorageTest extends \PHPUnit_Framework_TestCase
 	}
 
 	/**
+	 * @test
+	 */
+	public function transaction()
+	{
+		$pdo = $this->getPDO();
+		$this->createTestTable($pdo);
+		$storage = new SqlStorage($pdo, 'test');
+		$model1 = new ModelFixture();
+		$model1->foo = 'test';
+
+		$model2 = new ModelFixture();
+		$model2->foo = 'bar';
+
+		$storage->beginTransaction();
+		$storage->persist($model1);
+		$storage->persist($model2);
+		$storage->commit();
+	}
+
+	/**
+	 * @test
+	 */
+	public function transactionRollback()
+	{
+		$pdo = $this->getPDO();
+		$this->createTestTable($pdo);
+		$storage = new SqlStorage($pdo, 'test');
+		$model1 = new ModelFixture();
+		$model1->foo = 'test';
+
+		$model2 = new ModelFixture();
+		$model2->foo = 'bar';
+
+		$storage->beginTransaction();
+		$storage->persist($model1);
+		$storage->persist($model2);
+		$storage->rollBack();
+	}
+
+	/**
 	 * @param \PDO $pdo
 	 * @param string $sql
 	 * @param array $bind

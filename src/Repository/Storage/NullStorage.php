@@ -20,7 +20,6 @@ class NullStorage implements StorageInterface
 		}
 	}
 
-
 	/**
 	 * @param SavableModelInterface $model
 	 * @throws DirtyModelException
