@@ -64,4 +64,17 @@ class NullStorageTest extends \PHPUnit_Framework_TestCase
 		$query->addFilter(new KeyValueFilter('foo', 'bar'));
 		$storage->find($query, new ModelFixture());
 	}
+
+	/**
+	 * @test
+	 */
+	public function find_offsetLimit()
+	{
+		$storage = new NullStorage();
+		$query = new Query();
+		$query->setOffset(10);
+		$query->setLimit(1000);
+		$query->addFilter(new KeyValueFilter('foo', 'bar'));
+		$storage->find($query, new ModelFixture());
+	}
 }

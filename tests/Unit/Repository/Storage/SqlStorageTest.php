@@ -345,6 +345,69 @@ class SqlStorageTest extends \PHPUnit_Framework_TestCase
 	/**
 	 * @test
 	 */
+	public function find_limit()
+	{
+		$pdo = $this->getPDO();
+		$this->createTestTable($pdo);
+		$storage = new SqlStorage($pdo, 'test');
+
+		$model1 = new ModelFixture();
+		$model1->foo = 'test';
+		$model1->bar = 2;
+
+		$model2 = new ModelFixture();
+		$model2->foo = 'bar';
+		$model2->bar = 5;
+		$storage->persist($model1);
+		$storage->persist($model2);
+
+		$model = new ModelFixture();
+		$query = new Query();
+		$query->setLimit(1);
+		$modelList = $storage->find($query, $model);
+		$this->assertFalse($modelList->isEmpty());
+		$this->assertEquals(1, $modelList->count());
+	}
+
+	/**
+	 * @test
+	 */
+	public function find_limit_offset()
+	{
+		$pdo = $this->getPDO();
+		$this->createTestTable($pdo);
+		$storage = new SqlStorage($pdo, 'test');
+
+		$model1 = new ModelFixture();
+		$model1->foo = 'test';
+		$model1->bar = 2;
+
+		$model2 = new ModelFixture();
+		$model2->foo = 'bar';
+		$model2->bar = 5;
+
+		$model3 = new ModelFixture();
+		$model3->foo = 'bar2';
+		$model3->bar = 15;
+		$storage->persist($model1);
+		$storage->persist($model2);
+		$storage->persist($model3);
+
+		$model = new ModelFixture();
+		$query = new Query();
+		$query->setOffset(1);
+		$query->setLimit(1);
+		$modelList = $storage->find($query, $model);
+		$this->assertFalse($modelList->isEmpty());
+		$this->assertEquals(1, $modelList->count());
+		foreach ($modelList as $item) {
+			$this->assertEquals($model2, $item);
+		}
+	}
+
+	/**
+	 * @test
+	 */
 	public function find_Performance()
 	{
 		$pdo = $this->getPDO();

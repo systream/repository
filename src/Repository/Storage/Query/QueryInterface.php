@@ -8,4 +8,14 @@ interface QueryInterface
 	 * @return FilterInterface[]
 	 */
 	public function getFilters();
+
+	/**
+	 * @return int
+	 */
+	public function getLimit();
+
+	/**
+	 * @return int
+	 */
+	public function getOffset();
 }

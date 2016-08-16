@@ -52,7 +52,6 @@ class MongoStorage implements StorageInterface, QueryableStorageInterface
 	 */
 	public function find(QueryInterface $query, ModelInterface $model)
 	{
-
 		$queryArray = array();
 		foreach ($query->getFilters() as $filter) {
 			$queryArray[$filter->getFieldName()] = $filter->getValue();
@@ -60,6 +59,14 @@ class MongoStorage implements StorageInterface, QueryableStorageInterface
 
 		$list = new ModelList();
 		$cursor = $this->collection->find($queryArray);
+
+		if ($query->getLimit() !== null) {
+			$cursor->limit($query->getLimit());
+		}
+
+		if ($query->getOffset() !== null) {
+			$cursor->skip($query->getOffset());
+		}
 
 		foreach ($cursor as $doc) {
 			unset($doc['_id']);

@@ -181,8 +181,9 @@ class SqlStorage implements StorageInterface, TransactionAbleStorageInterface, Q
 			$sql .= $filter->getFieldName() . ' = :' . $bindKey . ' AND ';
 		}
 
-
 		$sql = substr($sql, 0, -5);
+
+		$this->setLimit($query, $sql);
 
 		$query = $this->pdo->prepare('select * from ' . $this->table . ' where ' . $sql);
 
@@ -200,5 +201,22 @@ class SqlStorage implements StorageInterface, TransactionAbleStorageInterface, Q
 		}
 
 		return $list;
+	}
+
+	/**
+	 * @param QueryInterface $query
+	 * @param string $sql
+	 * @return string
+	 */
+	protected function setLimit(QueryInterface $query, &$sql)
+	{
+		if ($query->getLimit() !== null) {
+
+			$sql .= ' limit ';
+			if ($query->getOffset() !== null) {
+				$sql .= $query->getOffset() . ',';
+			}
+			$sql .= $query->getLimit();
+		}
 	}
 }
