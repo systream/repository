@@ -7,7 +7,6 @@ use Systream\Repository\Model\SavableModelInterface;
 
 class MongoStorage implements StorageInterface
 {
-
 	/**
 	 * @var \MongoCollection
 	 */

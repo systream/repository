@@ -3,6 +3,8 @@
 namespace Tests\Systream\Storage;
 
 
+use Systream\Repository\Storage\Query\KeyValueFilter;
+use Systream\Repository\Storage\Query\Query;
 use Systream\Repository\Storage\SqlStorage;
 use Tests\Systream\Unit\Repository\Model\ModelFixture;
 
@@ -224,6 +226,149 @@ class SqlStorageTest extends \PHPUnit_Framework_TestCase
 		$storage->persist($model1);
 		$storage->persist($model2);
 		$storage->rollBack();
+	}
+
+	/**
+	 * @test
+	 */
+	public function find()
+	{
+		$pdo = $this->getPDO();
+		$this->createTestTable($pdo);
+		$storage = new SqlStorage($pdo, 'test');
+
+		$model1 = new ModelFixture();
+		$model1->foo = 'test';
+		$model1->bar = 2;
+
+		$model2 = new ModelFixture();
+		$model2->foo = 'bar';
+		$model2->bar = 5;
+		$storage->persist($model1);
+		$storage->persist($model2);
+
+		$model = new ModelFixture();
+		$query = new Query();
+		$query->addFilter(KeyValueFilter::create('foo', 'bar'));
+		$modelList = $storage->find($query, $model);
+
+		$this->assertFalse($modelList->isEmpty());
+		foreach ($modelList as $item) {
+			$this->assertEquals($model2, $item);
+		}
+	}
+
+	/**
+	 * @test
+	 */
+	public function find_multiQuery()
+	{
+		$pdo = $this->getPDO();
+		$this->createTestTable($pdo);
+		$storage = new SqlStorage($pdo, 'test');
+
+		$model1 = new ModelFixture();
+		$model1->foo = 'test';
+		$model1->bar = 2;
+
+		$model2 = new ModelFixture();
+		$model2->foo = 'bar';
+		$model2->bar = 5;
+		$storage->persist($model1);
+		$storage->persist($model2);
+
+		$model = new ModelFixture();
+		$query = new Query();
+		$query->addFilter(KeyValueFilter::create('foo', 'bar'));
+		$query->addFilter(KeyValueFilter::create('bar', 5));
+		$modelList = $storage->find($query, $model);
+
+		$this->assertFalse($modelList->isEmpty());
+		foreach ($modelList as $item) {
+			$this->assertEquals($model2, $item);
+		}
+	}
+
+	/**
+	 * @test
+	 */
+	public function find_multiQueryNotFound()
+	{
+		$pdo = $this->getPDO();
+		$this->createTestTable($pdo);
+		$storage = new SqlStorage($pdo, 'test');
+
+		$model1 = new ModelFixture();
+		$model1->foo = 'test';
+		$model1->bar = 2;
+
+		$model2 = new ModelFixture();
+		$model2->foo = 'bar';
+		$model2->bar = 5;
+		$storage->persist($model1);
+		$storage->persist($model2);
+
+		$model = new ModelFixture();
+		$query = new Query();
+		$query->addFilter(KeyValueFilter::create('foo', 'bar'));
+		$query->addFilter(KeyValueFilter::create('bar', 2));
+		$modelList = $storage->find($query, $model);
+		$this->assertTrue($modelList->isEmpty());
+	}
+
+	/**
+	 * @test
+	 */
+	public function find_emptyQuery()
+	{
+		$pdo = $this->getPDO();
+		$this->createTestTable($pdo);
+		$storage = new SqlStorage($pdo, 'test');
+
+		$model1 = new ModelFixture();
+		$model1->foo = 'test';
+		$model1->bar = 2;
+
+		$model2 = new ModelFixture();
+		$model2->foo = 'bar';
+		$model2->bar = 5;
+		$storage->persist($model1);
+		$storage->persist($model2);
+
+		$model = new ModelFixture();
+		$query = new Query();
+		$modelList = $storage->find($query, $model);
+		$this->assertFalse($modelList->isEmpty());
+		$this->assertEquals(2, $modelList->count());
+	}
+
+	/**
+	 * @test
+	 */
+	public function find_Performance()
+	{
+		$pdo = $this->getPDO();
+		$this->createTestTable($pdo);
+		$storage = new SqlStorage($pdo, 'test');
+
+		$count = 10000;
+		$countIterator = $count;
+		while ($countIterator) {
+			$model1 = new ModelFixture();
+			$model1->foo = md5(microtime(true));
+			$model1->bar = rand(0, $count);
+
+			$storage->persist($model1);
+			$countIterator--;
+		}
+
+		$model = new ModelFixture();
+		$query = new Query();
+		$start = microtime(true);
+		$modelList = $storage->find($query, $model);
+		$this->assertLessThanOrEqual(0.5, (microtime(true) - $start));
+
+		$this->assertEquals($count, $modelList->count());
 	}
 
 	/**

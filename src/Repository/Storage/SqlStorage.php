@@ -3,11 +3,15 @@
 namespace Systream\Repository\Storage;
 
 
+use Systream\Repository\Model\ModelInterface;
 use Systream\Repository\Model\SavableModelInterface;
+use Systream\Repository\ModelList\ModelList;
+use Systream\Repository\ModelList\ModelListInterface;
 use Systream\Repository\Storage\Exception\DirtyModelException;
 use Systream\Repository\Storage\Exception\NothingDeletedException;
+use Systream\Repository\Storage\Query\QueryInterface;
 
-class SqlStorage implements StorageInterface, TransactionAbleStorageInterface
+class SqlStorage implements StorageInterface, TransactionAbleStorageInterface, QueryableStorageInterface
 {
 	/**
 	 * @var \PDO
@@ -152,5 +156,49 @@ class SqlStorage implements StorageInterface, TransactionAbleStorageInterface
 	public function commit()
 	{
 		$this->pdo->commit();
+	}
+
+	/**
+	 * @param QueryInterface $query
+	 * @param ModelInterface $model
+	 * @return ModelListInterface
+	 */
+	public function find(QueryInterface $query, ModelInterface $model)
+	{
+		$sql = '1=1 AND ';
+		$bindData = array();
+		$index = 0;
+		foreach ($query->getFilters() as $filter) {
+			$value = $filter->getValue();
+			if ($value === null) {
+				$sql .= $filter->getFieldName() . ' is null AND ';
+				continue;
+			}
+
+			$bindKey = 'where_data' . $index++;
+
+			$bindData[$bindKey] = $value;
+			$sql .= $filter->getFieldName() . ' = :' . $bindKey . ' AND ';
+		}
+
+
+		$sql = substr($sql, 0, -5);
+
+		$query = $this->pdo->prepare('select * from ' . $this->table . ' where ' . $sql);
+
+		$query->execute($bindData);
+
+		$list = new ModelList();
+		while ($row = $query->fetch(\PDO::FETCH_ASSOC)) {
+			/** @var ModelInterface $item */
+			$item = new $model();
+			$item->loadData($row);
+			if ($item instanceof SavableModelInterface) {
+				$item->markAsStored();
+			}
+			$list->addListItem($item);
+		}
+
+		return $list;
 	}
 }

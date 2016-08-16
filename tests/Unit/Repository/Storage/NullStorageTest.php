@@ -3,7 +3,10 @@
 namespace Tests\Systream\Storage;
 
 
+use SebastianBergmann\CodeCoverage\Filter;
 use Systream\Repository\Storage\NullStorage;
+use Systream\Repository\Storage\Query\KeyValueFilter;
+use Systream\Repository\Storage\Query\Query;
 use Tests\Systream\Unit\Repository\Model\ModelFixture;
 
 class NullStorageTest extends \PHPUnit_Framework_TestCase
@@ -49,5 +52,16 @@ class NullStorageTest extends \PHPUnit_Framework_TestCase
 		$model->foo = 1;
 
 		$storage->purge($model);
+	}
+
+	/**
+	 * @test
+	 */
+	public function find()
+	{
+		$storage = new NullStorage();
+		$query = new Query();
+		$query->addFilter(new KeyValueFilter('foo', 'bar'));
+		$storage->find($query, new ModelFixture());
 	}
 }
