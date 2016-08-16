@@ -3,9 +3,13 @@
 namespace Systream\Repository\Storage;
 
 
+use Systream\Repository\Model\ModelInterface;
 use Systream\Repository\Model\SavableModelInterface;
+use Systream\Repository\ModelList\ModelList;
+use Systream\Repository\ModelList\ModelListInterface;
+use Systream\Repository\Storage\Query\QueryInterface;
 
-class MongoStorage implements StorageInterface
+class MongoStorage implements StorageInterface, QueryableStorageInterface
 {
 	/**
 	 * @var \MongoCollection
@@ -39,5 +43,35 @@ class MongoStorage implements StorageInterface
 	{
 		$this->collection->remove(array('id' => $model->getId()));
 		$model->markAsStored();
+	}
+
+	/**
+	 * @param QueryInterface $query
+	 * @param ModelInterface $model
+	 * @return ModelListInterface
+	 */
+	public function find(QueryInterface $query, ModelInterface $model)
+	{
+
+		$queryArray = array();
+		foreach ($query->getFilters() as $filter) {
+			$queryArray[$filter->getFieldName()] = $filter->getValue();
+		}
+
+		$list = new ModelList();
+		$cursor = $this->collection->find($queryArray);
+
+		foreach ($cursor as $doc) {
+			unset($doc['_id']);
+			/** @var ModelInterface $item */
+			$item = new $model();
+			$item->loadData($doc);
+			if ($item instanceof SavableModelInterface) {
+				$item->markAsStored();
+			}
+			$list->addListItem($item);
+		}
+
+		return $list;
 	}
 }
