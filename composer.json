@@ -1,7 +1,5 @@
 {
   "name": "systream/repository",
-  "description": "",
-  "minimum-stability": "dev",
   "license": "MIT",
   "keywords": ["repository", "model", "orm"],
   "authors": [
@@ -17,10 +15,11 @@
     }
   },
   "require": {
-    "php": ">=5.4.0",
-    "systream/event-dispatcher": "~1.0"
+    "php": ">=5.4.0 || >= 7.0",
+    "systream/event-dispatcher": "^1.0",
+    "solarium/solarium": "^3.6"
   },
   "require-dev": {
-    "phpunit/phpunit": "5.*"
+    "phpunit/phpunit": "^5.5"
   }
 }

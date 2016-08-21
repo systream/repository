@@ -1,8 +1,9 @@
 <?php
 
-namespace Tests\Systream\Storage;
+namespace Tests\Systream\Unit\Repository\Storage;
 
 
+use Systream\Repository\Storage\Exception\NotSupportedFilterException;
 use Systream\Repository\Storage\Query\KeyValueFilter;
 use Systream\Repository\Storage\Query\Query;
 use Systream\Repository\Storage\SqlStorage;
@@ -432,6 +433,20 @@ class SqlStorageTest extends \PHPUnit_Framework_TestCase
 		$this->assertLessThanOrEqual(0.5, (microtime(true) - $start));
 
 		$this->assertEquals($count, $modelList->count());
+	}
+
+	/**
+	 * @test
+	 */
+	public function unknownFilter()
+	{
+		$this->expectException(NotSupportedFilterException::class);
+		$pdo = $this->getPDO();
+		$storage = new SqlStorage($pdo, 'test');
+		$model = new ModelFixture();
+		$query = new Query();
+		$query->addFilter(new UnknownFilterFixture());
+		$storage->find($query, $model);
 	}
 
 	/**

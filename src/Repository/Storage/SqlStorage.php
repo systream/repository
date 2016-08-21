@@ -9,6 +9,8 @@ use Systream\Repository\ModelList\ModelList;
 use Systream\Repository\ModelList\ModelListInterface;
 use Systream\Repository\Storage\Exception\DirtyModelException;
 use Systream\Repository\Storage\Exception\NothingDeletedException;
+use Systream\Repository\Storage\Exception\NotSupportedFilterException;
+use Systream\Repository\Storage\Query\KeyValueFilter;
 use Systream\Repository\Storage\Query\QueryInterface;
 
 class SqlStorage implements StorageInterface, TransactionAbleStorageInterface, QueryableStorageInterface
@@ -22,6 +24,13 @@ class SqlStorage implements StorageInterface, TransactionAbleStorageInterface, Q
 	 * @var
 	 */
 	protected $table;
+
+	/**
+	 * @var array
+	 */
+	protected static $supportedFilters = array(
+		KeyValueFilter::class
+	);
 
 	/**
 	 * SqlStorage constructor.
@@ -162,6 +171,7 @@ class SqlStorage implements StorageInterface, TransactionAbleStorageInterface, Q
 	 * @param QueryInterface $query
 	 * @param ModelInterface $model
 	 * @return ModelListInterface
+	 * @throws NotSupportedFilterException
 	 */
 	public function find(QueryInterface $query, ModelInterface $model)
 	{
@@ -169,6 +179,11 @@ class SqlStorage implements StorageInterface, TransactionAbleStorageInterface, Q
 		$bindData = array();
 		$index = 0;
 		foreach ($query->getFilters() as $filter) {
+			if (!in_array(get_class($filter), self::$supportedFilters)) {
+				throw new NotSupportedFilterException(
+					sprintf('%s filter is not supported or unknown.', get_class($filter))
+				);
+			}
 			$value = $filter->getValue();
 			if ($value === null) {
 				$sql .= $filter->getFieldName() . ' is null AND ';

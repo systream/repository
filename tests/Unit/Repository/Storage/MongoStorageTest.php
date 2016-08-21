@@ -1,8 +1,9 @@
 <?php
 
-namespace Tests\Systream\Storage;
+namespace Tests\Systream\Unit\Repository\Storage;
 
 
+use Systream\Repository\Storage\Exception\NotSupportedFilterException;
 use Systream\Repository\Storage\MongoStorage;
 use Systream\Repository\Storage\Query\KeyValueFilter;
 use Systream\Repository\Storage\Query\Query;
@@ -10,18 +11,16 @@ use Tests\Systream\Unit\Repository\Model\ModelFixture;
 
 class MongoStorageTest extends \PHPUnit_Framework_TestCase
 {
-
 	/**
 	 * @test
 	 */
 	public function save()
 	{
-		$mongoCollection = $this->getMockBuilder('\MongoCollection')
-			->disableOriginalConstructor()
-			->setMethods(array('save'))
-			->getMock();
+		$mongoCollection = $this->getMongoCollectionMock();
+		$mongoCollection
+			->expects($this->once())
+			->method('save');
 
-		$mongoCollection->expects($this->once())->method('save');
 		$mongoStorage = new MongoStorage($mongoCollection);
 		$model = new ModelFixture();
 		$model->bar = 'foo';
@@ -36,12 +35,12 @@ class MongoStorageTest extends \PHPUnit_Framework_TestCase
 	 */
 	public function purge()
 	{
-		$mongoCollection = $this->getMockBuilder('\MongoCollection')
-			->disableOriginalConstructor()
-			->setMethods(array('remove'))
-			->getMock();
+		$mongoCollection = $this->getMongoCollectionMock();
 
-		$mongoCollection->expects($this->once())->method('remove');
+		$mongoCollection
+			->expects($this->once())
+			->method('remove');
+
 		$mongoStorage = new MongoStorage($mongoCollection);
 		$model = new ModelFixture();
 		$model->bar = 'foo';
@@ -55,10 +54,7 @@ class MongoStorageTest extends \PHPUnit_Framework_TestCase
 	 */
 	public function find_empty()
 	{
-		$mongoCollection = $this->getMockBuilder('\MongoCollection')
-			->disableOriginalConstructor()
-			->setMethods(array('find'))
-			->getMock();
+		$mongoCollection = $this->getMongoCollectionMock();
 
 		$mongoCursor = $this->getMockBuilder('\MongoCursor')
 			->disableOriginalConstructor()
@@ -82,10 +78,7 @@ class MongoStorageTest extends \PHPUnit_Framework_TestCase
 	 */
 	public function find_oneKeyValue()
 	{
-		$mongoCollection = $this->getMockBuilder('\MongoCollection')
-			->disableOriginalConstructor()
-			->setMethods(array('find'))
-			->getMock();
+		$mongoCollection = $this->getMongoCollectionMock();
 
 		$mongoCollection
 			->expects($this->once())
@@ -109,10 +102,7 @@ class MongoStorageTest extends \PHPUnit_Framework_TestCase
 	 */
 	public function find_moreKeyValue()
 	{
-		$mongoCollection = $this->getMockBuilder('\MongoCollection')
-			->disableOriginalConstructor()
-			->setMethods(array('find'))
-			->getMock();
+		$mongoCollection = $this->getMongoCollectionMock();
 
 		$mongoCollection
 			->expects($this->once())
@@ -126,5 +116,33 @@ class MongoStorageTest extends \PHPUnit_Framework_TestCase
 		$query->addFilter(KeyValueFilter::create('foo', 'bar'));
 		$query->addFilter(KeyValueFilter::create('bar', 10));
 		$mongoStorage->find($query, $model);
+	}
+
+	/**
+	 * @test
+	 */
+	public function unknownFilter()
+	{
+		$this->expectException(NotSupportedFilterException::class);
+		$mongoCollection = $this->getMockBuilder('\MongoCollection')
+			->disableOriginalConstructor()
+			->getMock();
+		$storage = new MongoStorage($mongoCollection);
+		$model = new ModelFixture();
+		$query = new Query();
+		$query->addFilter(new UnknownFilterFixture());
+		$storage->find($query, $model);
+	}
+
+	/**
+	 * @return \PHPUnit_Framework_MockObject_MockObject|\MongoCollection
+	 */
+	protected function getMongoCollectionMock()
+	{
+		$mongoCollection = $this->getMockBuilder('\\MongoCollection')
+			->setMethods(array('save', 'remove', 'find'))
+			->disableOriginalConstructor()
+			->getMock();
+		return $mongoCollection;
 	}
 }

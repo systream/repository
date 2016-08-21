@@ -7,6 +7,8 @@ use Systream\Repository\Model\ModelInterface;
 use Systream\Repository\Model\SavableModelInterface;
 use Systream\Repository\ModelList\ModelList;
 use Systream\Repository\ModelList\ModelListInterface;
+use Systream\Repository\Storage\Exception\NotSupportedFilterException;
+use Systream\Repository\Storage\Query\KeyValueFilter;
 use Systream\Repository\Storage\Query\QueryInterface;
 
 class MongoStorage implements StorageInterface, QueryableStorageInterface
@@ -15,6 +17,13 @@ class MongoStorage implements StorageInterface, QueryableStorageInterface
 	 * @var \MongoCollection
 	 */
 	private $collection;
+
+	/**
+	 * @var array
+	 */
+	protected static $supportedFilters = array(
+		KeyValueFilter::class
+	);
 
 	/**
 	 * MongoStorage constructor.
@@ -49,11 +58,17 @@ class MongoStorage implements StorageInterface, QueryableStorageInterface
 	 * @param QueryInterface $query
 	 * @param ModelInterface $model
 	 * @return ModelListInterface
+	 * @throws NotSupportedFilterException
 	 */
 	public function find(QueryInterface $query, ModelInterface $model)
 	{
 		$queryArray = array();
 		foreach ($query->getFilters() as $filter) {
+			if (!in_array(get_class($filter), self::$supportedFilters)) {
+				throw new NotSupportedFilterException(
+					sprintf('%s filter is not supported or unknown.', get_class($filter))
+				);
+			}
 			$queryArray[$filter->getFieldName()] = $filter->getValue();
 		}
 

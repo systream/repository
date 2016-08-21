@@ -1,9 +1,8 @@
 <?php
 
-namespace Tests\Systream\Storage;
+namespace Tests\Systream\Unit\Repository\Storage;
 
 
-use SebastianBergmann\CodeCoverage\Filter;
 use Systream\Repository\Storage\NullStorage;
 use Systream\Repository\Storage\Query\KeyValueFilter;
 use Systream\Repository\Storage\Query\Query;
