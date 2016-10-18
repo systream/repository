@@ -3,7 +3,7 @@
 namespace Tests\Systream\Unit\Repository\Storage;
 
 
-use Systream\Repository\Storage\MongoStorage;
+use Systream\Repository\Storage\LegacyMongoStorage;
 use Systream\Repository\Storage\Query\KeyValueFilter;
 use Systream\Repository\Storage\Query\Query;
 use Tests\Systream\Unit\Repository\Model\ModelFixture;

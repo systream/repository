@@ -3,7 +3,6 @@
 namespace Systream\Repository\Storage;
 
 
-use MongoDB\Collection;
 use Systream\Repository\Model\ModelInterface;
 use Systream\Repository\Model\SavableModelInterface;
 use Systream\Repository\ModelList\ModelList;
@@ -15,11 +14,14 @@ use Systream\Repository\Storage\Query\QueryInterface;
 /**
  * Class LegacyMongoStorage
  * @package Systream\Repository\Storage
+ *
+ *
+ * for php 5.x versions
  */
-class MongoStorage implements StorageInterface, QueryableStorageInterface
+class LegacyMongoStorage implements StorageInterface, QueryableStorageInterface
 {
 	/**
-	 * @var Collection
+	 * @var \MongoCollection
 	 */
 	private $collection;
 
@@ -32,9 +34,9 @@ class MongoStorage implements StorageInterface, QueryableStorageInterface
 
 	/**
 	 * MongoStorage constructor.
-	 * @param Collection $collection
+	 * @param \MongoCollection $collection
 	 */
-	public function __construct(Collection $collection)
+	public function __construct(\MongoCollection $collection)
 	{
 		$this->collection = $collection;
 	}
@@ -45,7 +47,7 @@ class MongoStorage implements StorageInterface, QueryableStorageInterface
 	 */
 	public function persist(SavableModelInterface $model)
 	{
-		$this->collection->in  ->save($model->toArray());
+		$this->collection->save($model->toArray());
 		$model->markAsStored();
 	}
 

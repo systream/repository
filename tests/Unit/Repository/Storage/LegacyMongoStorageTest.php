@@ -4,12 +4,12 @@ namespace Tests\Systream\Unit\Repository\Storage;
 
 
 use Systream\Repository\Storage\Exception\NotSupportedFilterException;
-use Systream\Repository\Storage\MongoStorage;
+use Systream\Repository\Storage\LegacyMongoStorage;
 use Systream\Repository\Storage\Query\KeyValueFilter;
 use Systream\Repository\Storage\Query\Query;
 use Tests\Systream\Unit\Repository\Model\ModelFixture;
 
-class MongoStorageTest extends \PHPUnit_Framework_TestCase
+class LegacyMongoStorageTest extends \PHPUnit_Framework_TestCase
 {
 	/**
 	 * @test
@@ -21,7 +21,7 @@ class MongoStorageTest extends \PHPUnit_Framework_TestCase
 			->expects($this->once())
 			->method('save');
 
-		$mongoStorage = new MongoStorage($mongoCollection);
+		$mongoStorage = new LegacyMongoStorage($mongoCollection);
 		$model = new ModelFixture();
 		$model->bar = 'foo';
 		$model->foo = 'bar';
@@ -41,7 +41,7 @@ class MongoStorageTest extends \PHPUnit_Framework_TestCase
 			->expects($this->once())
 			->method('remove');
 
-		$mongoStorage = new MongoStorage($mongoCollection);
+		$mongoStorage = new LegacyMongoStorage($mongoCollection);
 		$model = new ModelFixture();
 		$model->bar = 'foo';
 		$model->foo = 'bar';
@@ -67,7 +67,7 @@ class MongoStorageTest extends \PHPUnit_Framework_TestCase
 			->with($this->equalTo(array()))
 			->will($this->returnValue($mongoCursor));
 
-		$mongoStorage = new MongoStorage($mongoCollection);
+		$mongoStorage = new LegacyMongoStorage($mongoCollection);
 		$model = new ModelFixture();
 		$query = new Query();
 		$mongoStorage->find($query, $model);
@@ -89,7 +89,7 @@ class MongoStorageTest extends \PHPUnit_Framework_TestCase
 				array('foo' => 'baasdasdr', 'bar' => 'foasdfaso', 'id' => 11, '_id' => 1001),
 			)));
 
-		$mongoStorage = new MongoStorage($mongoCollection);
+		$mongoStorage = new LegacyMongoStorage($mongoCollection);
 		$model = new ModelFixture();
 		$query = new Query();
 		$query->addFilter(KeyValueFilter::create('foo', 'bar'));
@@ -110,7 +110,7 @@ class MongoStorageTest extends \PHPUnit_Framework_TestCase
 			->with($this->equalTo(array('foo' => 'bar', 'bar' => 10)))
 			->will($this->returnValue(array(array('foo' => 'bar'))));
 
-		$mongoStorage = new MongoStorage($mongoCollection);
+		$mongoStorage = new LegacyMongoStorage($mongoCollection);
 		$model = new ModelFixture();
 		$query = new Query();
 		$query->addFilter(KeyValueFilter::create('foo', 'bar'));
@@ -127,7 +127,7 @@ class MongoStorageTest extends \PHPUnit_Framework_TestCase
 		$mongoCollection = $this->getMockBuilder('\MongoCollection')
 			->disableOriginalConstructor()
 			->getMock();
-		$storage = new MongoStorage($mongoCollection);
+		$storage = new LegacyMongoStorage($mongoCollection);
 		$model = new ModelFixture();
 		$query = new Query();
 		$query->addFilter(new UnknownFilterFixture());
@@ -139,7 +139,7 @@ class MongoStorageTest extends \PHPUnit_Framework_TestCase
 	 */
 	protected function getMongoCollectionMock()
 	{
-		$mongoCollection = $this->getMockBuilder('\\MongoCollection')
+		$mongoCollection = $this->getMockBuilder('\MongoCollection')
 			->setMethods(array('save', 'remove', 'find'))
 			->disableOriginalConstructor()
 			->getMock();
