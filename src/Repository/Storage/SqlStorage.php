@@ -12,6 +12,7 @@ use Systream\Repository\Storage\Exception\NothingDeletedException;
 use Systream\Repository\Storage\Exception\NotSupportedFilterException;
 use Systream\Repository\Storage\Query\KeyValueFilter;
 use Systream\Repository\Storage\Query\QueryInterface;
+use Systream\Repository\Storage\Query\RawSqlQuery;
 
 class SqlStorage implements StorageInterface, TransactionAbleStorageInterface, QueryableStorageInterface
 {
@@ -58,7 +59,6 @@ class SqlStorage implements StorageInterface, TransactionAbleStorageInterface, Q
 		}
 
 		$this->create($model);
-
 	}
 
 	/**
@@ -175,33 +175,10 @@ class SqlStorage implements StorageInterface, TransactionAbleStorageInterface, Q
 	 */
 	public function find(QueryInterface $query, ModelInterface $model)
 	{
-		$sql = '1=1 AND ';
 		$bindData = array();
-		$index = 0;
-		foreach ($query->getFilters() as $filter) {
-			if (!in_array(get_class($filter), self::$supportedFilters)) {
-				throw new NotSupportedFilterException(
-					sprintf('%s filter is not supported or unknown.', get_class($filter))
-				);
-			}
-			$value = $filter->getValue();
-			if ($value === null) {
-				$sql .= $filter->getFieldName() . ' is null AND ';
-				continue;
-			}
+		$sql = $this->getSqlFindQuery($query, $bindData);
 
-			$bindKey = 'where_data' . $index++;
-
-			$bindData[$bindKey] = $value;
-			$sql .= $filter->getFieldName() . ' = :' . $bindKey . ' AND ';
-		}
-
-		$sql = substr($sql, 0, -5);
-
-		$this->setLimit($query, $sql);
-
-		$query = $this->pdo->prepare('select * from ' . $this->table . ' where ' . $sql);
-
+		$query = $this->pdo->prepare($sql);
 		$query->execute($bindData);
 
 		$list = new ModelList();
@@ -233,5 +210,63 @@ class SqlStorage implements StorageInterface, TransactionAbleStorageInterface, Q
 			}
 			$sql .= $query->getLimit();
 		}
+	}
+
+	/**
+	 * @param QueryInterface $query
+	 * @param array $bindData
+	 * @return array
+	 * @throws NotSupportedFilterException
+	 */
+	private function getSqlFromQuery(QueryInterface $query, array &$bindData)
+	{
+		$sql = '1=1 AND ';
+		$index = 0;
+		foreach ($query->getFilters() as $filter) {
+			$filterClassType = get_class($filter);
+			if (!in_array($filterClassType, self::$supportedFilters)) {
+				throw new NotSupportedFilterException(
+					sprintf('%s filter is not supported or unknown.', get_class($filter))
+				);
+			}
+
+			$value = $filter->getValue();
+
+			if ($filterClassType === RawSqlQuery::class) {
+				$sql .= $value . ' AND ';
+			} else {
+
+				if ($value === null) {
+					$sql .= $filter->getFieldName() . ' is null AND ';
+					continue;
+				}
+
+				$bindKey = 'where_data' . $index++;
+
+				$bindData[$bindKey] = $value;
+				$sql .= $filter->getFieldName() . ' = :' . $bindKey . ' AND ';
+			}
+		}
+
+		$sql = substr($sql, 0, -5);
+		$this->setLimit($query, $sql);
+
+		return 'select * from ' . $this->table . ' where ' . $sql;
+	}
+
+	/**
+	 * @param QueryInterface $query
+	 * @param array $bindData
+	 * @return array
+	 */
+	private function getSqlFindQuery(QueryInterface $query, array &$bindData)
+	{
+		if ($query instanceof RawSqlQuery) {
+			$sql = $query->getSql();
+			$bindData = $query->getBindData();
+			return $sql;
+		}
+
+		return $this->getSqlFromQuery($query, $bindData);
 	}
 }
