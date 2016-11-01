@@ -73,22 +73,26 @@ class MongoStoragePHP7 implements StorageInterface, QueryableStorageInterface
 			$queryArray[$filter->getFieldName()] = $filter->getValue();
 		}
 
-		$list = new ModelList();
-		$cursor = $this->collection->find($queryArray);
+		$options = array();
 
 		if ($query->getLimit() !== null) {
-			$cursor->limit($query->getLimit());
+			$options['limit'] = $query->getLimit();
 		}
 
 		if ($query->getOffset() !== null) {
-			$cursor->skip($query->getOffset());
+			$options['skip'] = $query->getOffset();
 		}
 
+		$list = new ModelList();
+		$cursor = $this->collection->find($queryArray, $options);
+
+		/** @var \MongoDB\Model\BSONDocument $doc */
 		foreach ($cursor as $doc) {
-			unset($doc['_id']);
+			$docArray = (array) $doc;
+			unset($docArray['_id']);
 			/** @var ModelInterface $item */
 			$item = new $model();
-			$item->loadData($doc);
+			$item->loadData($docArray);
 			if ($item instanceof SavableModelInterface) {
 				$item->markAsStored();
 			}
