@@ -3,35 +3,44 @@
 namespace Systream\Repository\Storage;
 
 
+use MongoDB\Collection as MongoDbCollection;
 use Systream\Repository\Model\ModelInterface;
 use Systream\Repository\Model\SavableModelInterface;
-use Systream\Repository\ModelList\ModelList;
 use Systream\Repository\ModelList\ModelListInterface;
 use Systream\Repository\Storage\Exception\NotSupportedFilterException;
-use Systream\Repository\Storage\Query\KeyValueFilter;
 use Systream\Repository\Storage\Query\QueryInterface;
 
+/**
+ * Class MongoStorage
+ * @package Systream\Repository\Storage
+ *
+ * MongoStorage Bridge
+ */
 class MongoStorage implements StorageInterface, QueryableStorageInterface
 {
-	/**
-	 * @var \MongoCollection
-	 */
-	private $collection;
 
 	/**
-	 * @var array
+	 * @var StorageInterface|QueryableStorageInterface
 	 */
-	protected static $supportedFilters = array(
-		KeyValueFilter::class
-	);
+	private $storage;
 
 	/**
 	 * MongoStorage constructor.
-	 * @param \MongoCollection $collection
+	 * @param \MongoCollection|MongoDbCollection $client
 	 */
-	public function __construct(\MongoCollection $collection)
+	public function __construct($client)
 	{
-		$this->collection = $collection;
+		if ($client instanceof \MongoCollection) {
+			$this->storage = new MongoStoragePHP5($client);
+		}
+
+		if ($client instanceof MongoDbCollection) {
+			$this->storage = new MongoStoragePHP7($client);
+		}
+
+		if (!$this->storage) {
+			throw new \InvalidArgumentException('Client not supported: ' . get_class($client));
+		}
 	}
 
 	/**
@@ -40,8 +49,7 @@ class MongoStorage implements StorageInterface, QueryableStorageInterface
 	 */
 	public function persist(SavableModelInterface $model)
 	{
-		$this->collection->save($model->toArray());
-		$model->markAsStored();
+		$this->storage->persist($model);
 	}
 
 	/**
@@ -50,8 +58,7 @@ class MongoStorage implements StorageInterface, QueryableStorageInterface
 	 */
 	public function purge(SavableModelInterface $model)
 	{
-		$this->collection->remove(array('id' => $model->getId()));
-		$model->markAsStored();
+		$this->storage->purge($model);
 	}
 
 	/**
@@ -62,38 +69,6 @@ class MongoStorage implements StorageInterface, QueryableStorageInterface
 	 */
 	public function find(QueryInterface $query, ModelInterface $model)
 	{
-		$queryArray = array();
-		foreach ($query->getFilters() as $filter) {
-			if (!in_array(get_class($filter), self::$supportedFilters)) {
-				throw new NotSupportedFilterException(
-					sprintf('%s filter is not supported or unknown.', get_class($filter))
-				);
-			}
-			$queryArray[$filter->getFieldName()] = $filter->getValue();
-		}
-
-		$list = new ModelList();
-		$cursor = $this->collection->find($queryArray);
-
-		if ($query->getLimit() !== null) {
-			$cursor->limit($query->getLimit());
-		}
-
-		if ($query->getOffset() !== null) {
-			$cursor->skip($query->getOffset());
-		}
-
-		foreach ($cursor as $doc) {
-			unset($doc['_id']);
-			/** @var ModelInterface $item */
-			$item = new $model();
-			$item->loadData($doc);
-			if ($item instanceof SavableModelInterface) {
-				$item->markAsStored();
-			}
-			$list->addListItem($item);
-		}
-
-		return $list;
+		return $this->storage->find($query, $model);
 	}
 }

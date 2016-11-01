@@ -9,8 +9,12 @@ use Systream\Repository\Storage\Query\KeyValueFilter;
 use Systream\Repository\Storage\Query\Query;
 use Tests\Systream\Unit\Repository\Model\ModelFixture;
 
-class MongoStorageTest extends \PHPUnit_Framework_TestCase
+class MongoStoragePHP5Test extends \PHPUnit_Framework_TestCase
 {
+	const SAVE_METHOD = 'save';
+	const REMOVE_METHOD = 'remove';
+	const FIND_METHOD = 'find';
+
 	/**
 	 * @test
 	 */
@@ -19,7 +23,7 @@ class MongoStorageTest extends \PHPUnit_Framework_TestCase
 		$mongoCollection = $this->getMongoCollectionMock();
 		$mongoCollection
 			->expects($this->once())
-			->method('save');
+			->method(static::SAVE_METHOD);
 
 		$mongoStorage = new MongoStorage($mongoCollection);
 		$model = new ModelFixture();
@@ -39,7 +43,7 @@ class MongoStorageTest extends \PHPUnit_Framework_TestCase
 
 		$mongoCollection
 			->expects($this->once())
-			->method('remove');
+			->method(static::REMOVE_METHOD);
 
 		$mongoStorage = new MongoStorage($mongoCollection);
 		$model = new ModelFixture();
@@ -58,12 +62,12 @@ class MongoStorageTest extends \PHPUnit_Framework_TestCase
 
 		$mongoCursor = $this->getMockBuilder('\MongoCursor')
 			->disableOriginalConstructor()
-			->setMethods(array('find'))
+			->setMethods(array(self::FIND_METHOD))
 			->getMock();
 
 		$mongoCollection
 			->expects($this->once())
-			->method('find')
+			->method(self::FIND_METHOD)
 			->with($this->equalTo(array()))
 			->will($this->returnValue($mongoCursor));
 
@@ -82,7 +86,7 @@ class MongoStorageTest extends \PHPUnit_Framework_TestCase
 
 		$mongoCollection
 			->expects($this->once())
-			->method('find')
+			->method(self::FIND_METHOD)
 			->with($this->equalTo(array('foo' => 'bar')))
 			->will($this->returnValue(array(
 				array('foo' => 'bar', 'bar' => 'foo', 'id' => 10, '_id' => 1000),
@@ -106,7 +110,7 @@ class MongoStorageTest extends \PHPUnit_Framework_TestCase
 
 		$mongoCollection
 			->expects($this->once())
-			->method('find')
+			->method(self::FIND_METHOD)
 			->with($this->equalTo(array('foo' => 'bar', 'bar' => 10)))
 			->will($this->returnValue(array(array('foo' => 'bar'))));
 
@@ -140,7 +144,7 @@ class MongoStorageTest extends \PHPUnit_Framework_TestCase
 	protected function getMongoCollectionMock()
 	{
 		$mongoCollection = $this->getMockBuilder('\\MongoCollection')
-			->setMethods(array('save', 'remove', 'find'))
+			->setMethods(array(self::SAVE_METHOD, self::REMOVE_METHOD, self::FIND_METHOD))
 			->disableOriginalConstructor()
 			->getMock();
 		return $mongoCollection;

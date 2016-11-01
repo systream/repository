@@ -215,7 +215,7 @@ class SqlStorage implements StorageInterface, TransactionAbleStorageInterface, Q
 	/**
 	 * @param QueryInterface $query
 	 * @param array $bindData
-	 * @return array
+	 * @return string
 	 * @throws NotSupportedFilterException
 	 */
 	private function getSqlFromQuery(QueryInterface $query, array &$bindData)
@@ -257,7 +257,7 @@ class SqlStorage implements StorageInterface, TransactionAbleStorageInterface, Q
 	/**
 	 * @param QueryInterface $query
 	 * @param array $bindData
-	 * @return array
+	 * @return string
 	 */
 	private function getSqlFindQuery(QueryInterface $query, array &$bindData)
 	{
