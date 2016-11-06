@@ -56,12 +56,8 @@ class ElasticSearchStorageTest extends \PHPUnit_Framework_TestCase
 	 */
 	protected function getQueryResultMock()
 	{
-		return $this->getMockBuilder('Solarium\QueryType\MoreLikeThis\Result')
+		return $this->getMockBuilder('\Elasticsearch\Client')
 		->setMethods(
-			array(
-				'getQuery',
-				'parseResponse',
-			)
 		);
 	}
 }

@@ -1,7 +1,6 @@
 <?php
 
-namespace App\Storage;
-
+namespace Systream\Repository\Storage;
 
 use Elasticsearch\Client;
 use Systream\Repository\Model\ModelInterface;
@@ -13,8 +12,6 @@ use Systream\Repository\Storage\Exception\CouldNotPurgeException;
 use Systream\Repository\Storage\Exception\NotSupportedFilterException;
 use Systream\Repository\Storage\Query\KeyValueFilter;
 use Systream\Repository\Storage\Query\QueryInterface;
-use Systream\Repository\Storage\QueryableStorageInterface;
-use Systream\Repository\Storage\StorageInterface;
 
 class ElasticSearchStorage implements StorageInterface, QueryableStorageInterface
 {
