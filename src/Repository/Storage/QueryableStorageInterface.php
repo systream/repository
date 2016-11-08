@@ -7,7 +7,7 @@ use Systream\Repository\Model\ModelInterface;
 use Systream\Repository\ModelList\ModelListInterface;
 use Systream\Repository\Storage\Query\QueryInterface;
 
-interface QueryableStorageInterface
+interface QueryableStorageInterface extends StorageInterface
 {
 	/**
 	 * @param QueryInterface $query
