@@ -3,7 +3,7 @@
 namespace Systream\Repository\Model;
 
 
-interface SavableModelInterface
+interface SavableModelInterface extends ModelInterface
 {
 	/**
 	 * @return array

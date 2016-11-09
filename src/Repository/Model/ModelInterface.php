@@ -3,6 +3,11 @@
 namespace Systream\Repository\Model;
 
 
+/**
+ * Interface ModelInterface
+ * @package Systream\Repository\Model
+ *
+ */
 interface ModelInterface
 {
 	/**

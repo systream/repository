@@ -3,7 +3,7 @@
 namespace Systream\Repository\Storage\Exception;
 
 
-class CouldNotPersistException extends \Exception
+class CouldNotPersistException extends \RuntimeException
 {
 
 }

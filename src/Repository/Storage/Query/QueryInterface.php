@@ -10,12 +10,12 @@ interface QueryInterface
 	public function getFilters();
 
 	/**
-	 * @return int
+	 * @return int|null
 	 */
 	public function getLimit();
 
 	/**
-	 * @return int
+	 * @return int|null
 	 */
 	public function getOffset();
 }

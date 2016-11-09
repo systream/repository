@@ -3,9 +3,7 @@
 namespace Tests\Systream\Unit\Repository\Storage;
 
 
-use Systream\Repository\Storage\MongoStorage;
-use Systream\Repository\Storage\Query\KeyValueFilter;
-use Systream\Repository\Storage\Query\Query;
+use Systream\Repository\Storage\ElasticSearchStorage;
 use Tests\Systream\Unit\Repository\Model\ModelFixture;
 
 class ElasticSearchStorageTest extends \PHPUnit_Framework_TestCase
@@ -16,7 +14,13 @@ class ElasticSearchStorageTest extends \PHPUnit_Framework_TestCase
 	 */
 	public function save()
 	{
-
+		$client = $this->getQueryResultMock();
+		$client->expects($this->atLeastOnce())->method('index');
+		$storage = new ElasticSearchStorage($client, 'foo', 'bar');
+		$model = new ModelFixture();
+		$model->foo = 'test';
+		$storage->persist($model);
+		$this->assertFalse($model->isDirty());
 	}
 
 	/**
@@ -24,6 +28,16 @@ class ElasticSearchStorageTest extends \PHPUnit_Framework_TestCase
 	 */
 	public function purge()
 	{
+		$client = $this->getQueryResultMock();
+		$client->expects($this->atLeastOnce())->method('update');
+		$storage = new ElasticSearchStorage($client, 'foo', 'bar');
+		$model = new ModelFixture();
+		$model->foo = 'test';
+		$model->id = 10;
+		$model->markAsStored();
+		$model->foo = 'test2';
+		$storage->persist($model);
+		$this->assertFalse($model->isDirty());
 
 	}
 
@@ -52,12 +66,13 @@ class ElasticSearchStorageTest extends \PHPUnit_Framework_TestCase
 	}
 
 	/**
-	 * @return \PHPUnit_Framework_MockObject_MockObject
+	 * @return \PHPUnit_Framework_MockObject_MockObject|\Elasticsearch\Client
 	 */
 	protected function getQueryResultMock()
 	{
 		return $this->getMockBuilder('\Elasticsearch\Client')
-		->setMethods(
-		);
+			->setMethods(array('index', 'update'))
+			->disableOriginalConstructor()
+			->getMock();
 	}
 }

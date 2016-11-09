@@ -53,6 +53,7 @@ class ElasticSearchStorage implements StorageInterface, QueryableStorageInterfac
 			$params['body'] = ['doc' => $model->toArray()];
 			$params['id'] = $model->getId();
 			$this->client->update($params);
+			$model->markAsStored();
 			return;
 		}
 

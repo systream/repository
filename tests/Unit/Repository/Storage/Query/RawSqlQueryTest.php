@@ -61,6 +61,24 @@ class RawSqlQueryTest extends \PHPUnit_Framework_TestCase
 	}
 
 	/**
+	 * @test
+	 */
+	public function limitNull()
+	{
+		$query = new RawSqlQuery('select * from test');
+		$this->assertNull($query->getLimit());
+	}
+
+	/**
+	 * @test
+	 */
+	public function offsetNull()
+	{
+		$query = new RawSqlQuery('select * from test');
+		$this->assertNull($query->getOffset());
+	}
+
+	/**
 	 * @return array
 	 */
 	public function rawQueryDataProvider()
@@ -71,8 +89,9 @@ class RawSqlQueryTest extends \PHPUnit_Framework_TestCase
 			array('select * from test limit 2', 2),
 			array('select * from test limit 1,2', 2),
 			array('select foo from test', 3),
-			array('select foo from test  group by bar', 2),
+			array('select foo from test group by bar', 2),
 			array('select foo from test group by bar order by foo', 2),
+			array('select foo from test group by bar order by foo DESC', 2),
 		);
 	}
 

@@ -231,6 +231,21 @@ class ModelAbstractTest extends \PHPUnit_Framework_TestCase
 
 			array(
 				array(
+					'fooo' => 'ááéűáéűá',
+					'f2' => null,
+					'bar' => new \stdClass(),
+					'óüüüóáááápűőá' => true,
+				)
+			),
+
+			array(
+				array(
+					0 => false,
+				)
+			),
+
+			array(
+				array(
 					'bar' => new ModelFixture()
 				)
 			),

@@ -117,4 +117,9 @@ abstract class ModelAbstract implements ModelInterface, SavableModelInterface
 	{
 		return $this->id;
 	}
+
+	public function validate()
+	{
+
+	}
 }

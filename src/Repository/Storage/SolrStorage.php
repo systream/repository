@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Storage;
+namespace Systream\Repository\Storage;
 
 
 use Solarium\Client as SolrClient;
@@ -13,8 +13,6 @@ use Systream\Repository\Storage\Exception\CouldNotPurgeException;
 use Systream\Repository\Storage\Exception\NotSupportedFilterException;
 use Systream\Repository\Storage\Query\KeyValueFilter;
 use Systream\Repository\Storage\Query\QueryInterface;
-use Systream\Repository\Storage\QueryableStorageInterface;
-use Systream\Repository\Storage\StorageInterface;
 
 class SolrStorage implements StorageInterface, QueryableStorageInterface
 {
@@ -52,6 +50,7 @@ class SolrStorage implements StorageInterface, QueryableStorageInterface
 				'Model cannot persists: ' .  $result->getResponse()->getStatusMessage()
 			);
 		}
+		$model->markAsStored();
 	}
 
 	/**
@@ -84,7 +83,7 @@ class SolrStorage implements StorageInterface, QueryableStorageInterface
 		$helper = $solrQuery->getHelper();
 
 		foreach ($query->getFilters() as $filter) {
-			if (!$filter instanceof KeyValueFilter::class) {
+			if (!$filter instanceof KeyValueFilter) {
 				throw new NotSupportedFilterException(
 					sprintf('%s filter is not supported or unknown.', get_class($filter))
 				);

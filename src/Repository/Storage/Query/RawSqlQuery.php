@@ -35,7 +35,7 @@ class RawSqlQuery implements QueryInterface
 	}
 
 	/**
-	 * @return int
+	 * @return int|null
 	 */
 	public function getLimit()
 	{
@@ -43,7 +43,7 @@ class RawSqlQuery implements QueryInterface
 	}
 
 	/**
-	 * @return int
+	 * @return int|null
 	 */
 	public function getOffset()
 	{
