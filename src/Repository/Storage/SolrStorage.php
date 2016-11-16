@@ -16,7 +16,6 @@ use Systream\Repository\Storage\Query\QueryInterface;
 
 class SolrStorage implements StorageInterface, QueryableStorageInterface
 {
-	const SOLR_PROPERTY_PREFIX = 'property.';
 	/**
 	 * @var SolrClient
 	 */
@@ -36,7 +35,7 @@ class SolrStorage implements StorageInterface, QueryableStorageInterface
 		$update = $this->solrClient->createUpdate();
 		$doc = $update->createDocument();
 		foreach ($model->getFields() as $field) {
-			$docFieldName = self::SOLR_PROPERTY_PREFIX . $field;
+			$docFieldName = $field;
 			$doc->$docFieldName = $model->$field;
 		}
 		$doc->id = $model->getId();
@@ -89,7 +88,7 @@ class SolrStorage implements StorageInterface, QueryableStorageInterface
 				);
 			}
 			$solrQuery->createFilterQuery($filter->getFieldName())
-				->setQuery(self::SOLR_PROPERTY_PREFIX . $filter->getFieldName() . ': ' . $helper->escapePhrase($filter->getValue()));
+				->setQuery($filter->getFieldName() . ': ' . $helper->escapePhrase($filter->getValue()));
 		}
 
 		if ($query->getLimit() !== null) {
