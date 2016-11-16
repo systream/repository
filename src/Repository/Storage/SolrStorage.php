@@ -21,6 +21,10 @@ class SolrStorage implements StorageInterface, QueryableStorageInterface
 	 */
 	private $solrClient;
 
+	/**
+	 * SolrStorage constructor.
+	 * @param SolrClient $solrClient
+	 */
 	public function __construct(SolrClient $solrClient)
 	{
 		$this->solrClient = $solrClient;
@@ -35,8 +39,7 @@ class SolrStorage implements StorageInterface, QueryableStorageInterface
 		$update = $this->solrClient->createUpdate();
 		$doc = $update->createDocument();
 		foreach ($model->getFields() as $field) {
-			$docFieldName = $field;
-			$doc->$docFieldName = $model->$field;
+			$doc->$field = $model->$field;
 		}
 		$doc->id = $model->getId();
 
