@@ -93,11 +93,11 @@ class SolrStorage implements StorageInterface, QueryableStorageInterface
 		}
 
 		if ($query->getLimit() !== null) {
-			$solrQuery->setRows(20);
+			$solrQuery->setRows($query->getLimit());
 		}
 
 		if ($query->getOffset() !== null) {
-			$solrQuery->setStart(2);
+			$solrQuery->setStart($query->getOffset());
 		}
 
 		$result = $this->solrClient->select($solrQuery);
