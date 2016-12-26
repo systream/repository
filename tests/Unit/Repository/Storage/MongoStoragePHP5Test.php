@@ -99,6 +99,11 @@ class MongoStoragePHP5Test extends \PHPUnit_Framework_TestCase
 		$query->addFilter(KeyValueFilter::create('foo', 'bar'));
 		$modelList = $mongoStorage->find($query, $model);
 		$this->assertEquals(2, $modelList->count());
+
+		$model1 = $modelList->current();
+		$modelList->next();
+		$model2 = $modelList->current();
+		$this->assertNotSame($model1, $model2);
 	}
 
 	/**

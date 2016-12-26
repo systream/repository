@@ -129,7 +129,7 @@ class ElasticSearchStorage implements StorageInterface, QueryableStorageInterfac
 		foreach ($results['hits']['hits'] as $doc) {
 			/** @var ModelInterface $item */
 			$doc['_source']['id'] = $doc['_id'];
-			$item = new $model();
+			$item = clone $model;
 			$item->loadData($doc['_source']);
 			if ($item instanceof SavableModelInterface) {
 				$item->markAsStored();

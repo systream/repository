@@ -184,7 +184,7 @@ class SqlStorage implements StorageInterface, TransactionAbleStorageInterface, Q
 		$list = new ModelList();
 		while ($row = $query->fetch(\PDO::FETCH_ASSOC)) {
 			/** @var ModelInterface $item */
-			$item = new $model();
+			$item = clone $model;
 			$item->loadData($row);
 			if ($item instanceof SavableModelInterface) {
 				$item->markAsStored();

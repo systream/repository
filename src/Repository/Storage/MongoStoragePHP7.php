@@ -91,7 +91,7 @@ class MongoStoragePHP7 implements StorageInterface, QueryableStorageInterface
 			$docArray = (array) $doc;
 			unset($docArray['_id']);
 			/** @var ModelInterface $item */
-			$item = new $model();
+			$item = clone $model;
 			$item->loadData($docArray);
 			if ($item instanceof SavableModelInterface) {
 				$item->markAsStored();

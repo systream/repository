@@ -86,7 +86,7 @@ class MongoStoragePHP5 implements StorageInterface, QueryableStorageInterface
 		foreach ($cursor as $doc) {
 			unset($doc['_id']);
 			/** @var ModelInterface $item */
-			$item = new $model();
+			$item = clone $model;
 			$item->loadData($doc);
 			if ($item instanceof SavableModelInterface) {
 				$item->markAsStored();

@@ -107,7 +107,7 @@ class SolrStorage implements StorageInterface, QueryableStorageInterface
 		$list = new ModelList();
 		foreach ($result as $doc) {
 			/** @var ModelInterface $item */
-			$item = new $model();
+			$item = clone $model;
 			$item->loadData($doc->getFields());
 			if ($item instanceof SavableModelInterface) {
 				$item->markAsStored();
