@@ -3,6 +3,8 @@
 namespace Tests\Systream\Unit\Repository\Model;
 
 
+use Systream\Repository\ModelList\ModelList;
+
 class ModelAbstractTest extends \PHPUnit_Framework_TestCase
 {
 
@@ -22,12 +24,83 @@ class ModelAbstractTest extends \PHPUnit_Framework_TestCase
 	 * @param $data
 	 * @dataProvider modelDataProvider
 	 */
-	public function loadData_getData($data)
+	public function loadData_getData($data, $expected = null)
 	{
 		$model = $this->getModel();
 		$model->loadData($data);
-		$this->assertEquals($data, $model->getData());
-		$this->assertEquals($data, $model->toArray());
+		if (!$expected) {
+			$expected = $data;
+		}
+		$this->assertEquals($expected, $model->getData());
+		$this->assertEquals($expected, $model->toArray());
+	}
+
+	/**
+	 * @test
+	 */
+	public function toArray_Model()
+	{
+		$fixture = $this->getModel();
+		$fixture->foo = '2bar';
+		$fixture->bar = '2foo';
+
+		$model = $this->getModel();
+		$model->bar = 'foo';
+		$model->foo = 'bar';
+		$model->fixture = $fixture;
+
+		$this->assertEquals(
+			array(
+				'bar' => 'foo',
+				'foo' => 'bar',
+				'fixture' => array(
+					'foo' => '2bar',
+					'bar' => '2foo'
+				)
+			),
+			$model->toArray()
+		);
+	}
+
+	/**
+	 * @test
+	 */
+	public function toArray_ModelList()
+	{
+		$fixture = $this->getModel();
+		$fixture->foo = '2bar';
+		$fixture->bar = '2foo';
+
+		$fixture2 = $this->getModel();
+		$fixture2->foo = '3bar';
+		$fixture2->bar = '3foo';
+
+		$modelList = new ModelList();
+		$modelList->addListItem($fixture);
+		$modelList->addListItem($fixture2);
+
+		$model = $this->getModel();
+		$model->bar = 'foo';
+		$model->foo = 'bar';
+		$model->fixture = $modelList;
+
+		$this->assertEquals(
+			array(
+				'bar' => 'foo',
+				'foo' => 'bar',
+				'fixture' => array(
+					array(
+						'foo' => '2bar',
+						'bar' => '2foo'
+					),
+					array(
+						'foo' => '3bar',
+						'bar' => '3foo'
+					),
+				)
+			),
+			$model->toArray()
+		);
 	}
 
 	/**
@@ -56,7 +129,9 @@ class ModelAbstractTest extends \PHPUnit_Framework_TestCase
 			$model->$property = $value;
 		}
 
-		$this->assertEquals($data, $model->getData());
+		foreach ($data as $property => $value) {
+			$this->assertEquals($value, $model->$property);
+		}
 	}
 
 	/**
@@ -247,6 +322,9 @@ class ModelAbstractTest extends \PHPUnit_Framework_TestCase
 			array(
 				array(
 					'bar' => new ModelFixture()
+				),
+				array(
+					'bar' => array()
 				)
 			),
 		);

@@ -1,6 +1,7 @@
 <?php
 
 namespace Systream\Repository\Model;
+use Systream\Repository\ModelList\ModelListInterface;
 
 /**
  * @property string $id
@@ -61,7 +62,23 @@ abstract class ModelAbstract implements ModelInterface, SavableModelInterface
 	 */
 	public function getData()
 	{
-		return $this->data;
+		$data = [];
+		foreach ($this->data as $column => $value) {
+			if ($value instanceof ModelInterface) {
+				$data[$column] = $value->getData();
+				continue;
+			}
+
+			if ($value instanceof ModelListInterface) {
+				$data[$column] = array();
+				foreach ($value as $item) {
+					$data[$column][] = $item->getData();
+				}
+				continue;
+			}
+			$data[$column] = $value;
+		}
+		return $data;
 	}
 
 	/**
